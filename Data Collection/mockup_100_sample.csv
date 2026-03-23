@@ -1,0 +1,141 @@
+patent_id,year,title,abstract,is_genuine_ai,false_positive_reason,ai_technique,application_domain,data_modality,innovation_orientation,core_ai_task,contribution_type,training_paradigm,is_llm_related,confidence,reasoning,raw_response
+154-221-773-338-745,2016.0,Speech dialogue control method,"A cloud server extracts voiceprint data from voice data of a user, and distinguishes the user. The cloud server identifies a task which the user instructs, from the voice data of the user. If contexts required to execute the task have not been amassed, the cloud server registers the distinguished us...",True,,speech_audio,productivity_enterprise,audio_speech,applied,decision_support,application_implementation,not_specified,False,high,"The invention applies AI techniques to enhance user interaction in a specific productivity context, making it domain-specific.","{
+  ""is_genuine_ai"": true,
+  ""false_positive_reason"": null,
+  ""ai_technique"": ""speech_audio"",
+  ""application_domain"": ""productivity_enterprise"",
+  ""data_modality"": ""audio_speech"",
+  ""innovation_orientation"": ""applied"",
+  ""core_ai_task"": ""decision_support"",
+  ""contribution_type"": ""application_implementation"",
+  ""training_paradigm"": ""not_specified"",
+  ""is_llm_related"": false,
+  ""confidence"": ""high"",
+  ""reasoning"": ""The invention applies AI techniques to enhance user interaction in a specific productivity context, making it domain-specific.""
+}"
+082-282-902-624-473,2017.0,Low power integrated analog mathematical engine,"A method for creating on chip analog mathematical engines is provided utilizing a neural network with a switched capacitor structure to implement coefficients for weighted connections and error functions for the neural network. The neural networks are capable of any transfer function, learning, doin...",True,,neural_network_general,industrial_manufacturing,sensor_tabular,fundamental,optimization_planning,architectural,not_specified,False,high,"The patent describes a new method for implementing neural networks in analog circuits, which is a fundamental innovation in AI architecture.","{
+  ""is_genuine_ai"": true,
+  ""false_positive_reason"": null,
+  ""ai_technique"": ""neural_network_general"",
+  ""application_domain"": ""industrial_manufacturing"",
+  ""data_modality"": ""sensor_tabular"",
+  ""innovation_orientation"": ""fundamental"",
+  ""core_ai_task"": ""optimization_planning"",
+  ""contribution_type"": ""architectural"",
+  ""training_paradigm"": ""not_specified"",
+  ""is_llm_related"": false,
+  ""confidence"": ""high"",
+  ""reasoning"": ""The patent describes a new method for implementing neural networks in analog circuits, which is a fundamental innovation in AI architecture.""
+}"
+115-191-552-365-951,2019.0,GENERATING CROSS-DOMAIN DATA USING VARIATIONAL MAPPING BETWEEN EMBEDDING SPACES,"A computer-implemented method, computer program product, and system are provided for learning mapping information between different modalities of data. The method includes mapping, by a processor, high-dimensional modalities of data into a low-dimensional manifold to obtain therefor respective low-d...",True,,neural_network_general,other,multimodal,fundamental,optimization_planning,algorithmic,not_specified,False,high,"The innovation involves a new method for learning mappings between different data modalities, which is applicable across various domains.","{
+  ""is_genuine_ai"": true,
+  ""false_positive_reason"": null,
+  ""ai_technique"": ""neural_network_general"",
+  ""application_domain"": ""other"",
+  ""data_modality"": ""multimodal"",
+  ""innovation_orientation"": ""fundamental"",
+  ""core_ai_task"": ""optimization_planning"",
+  ""contribution_type"": ""algorithmic"",
+  ""training_paradigm"": ""not_specified"",
+  ""is_llm_related"": false,
+  ""confidence"": ""high"",
+  ""reasoning"": ""The innovation involves a new method for learning mappings between different data modalities, which is applicable across various domains.""
+}"
+117-902-400-909-789,2019.0,Automated validation of condition of assembly,A method and apparatus for performing an automated validation of a condition of assembly for a structure. A plurality of images of the structure are registered to a computer model of the structure in which an image in the plurality of images captures a portion of the structure. Each image in the plu...,True,,computer_vision_cnn,industrial_manufacturing,image_video,applied,classification_detection,application_implementation,not_specified,False,high,"The invention applies AI techniques to validate assembly conditions in a specific industrial context, making it domain-specific.","{
+  ""is_genuine_ai"": true,
+  ""false_positive_reason"": null,
+  ""ai_technique"": ""computer_vision_cnn"",
+  ""application_domain"": ""industrial_manufacturing"",
+  ""data_modality"": ""image_video"",
+  ""innovation_orientation"": ""applied"",
+  ""core_ai_task"": ""classification_detection"",
+  ""contribution_type"": ""application_implementation"",
+  ""training_paradigm"": ""not_specified"",
+  ""is_llm_related"": false,
+  ""confidence"": ""high"",
+  ""reasoning"": ""The invention applies AI techniques to validate assembly conditions in a specific industrial context, making it domain-specific.""
+}"
+130-138-412-818-665,2019.0,Author anonymization,"Embodiments of the present invention disclose a method, computer program product, and system for text author anonymization for de-identification of written text. This may be used to replace written text after learning text author writing characteristics, such frequently written terms, grammar patter...",True,,classical_ml,nlp_text,text_language,applied,optimization_planning,application_implementation,not_specified,False,medium,"The invention applies AI techniques to a specific problem of author anonymization in text, making it domain-specific.","{
+  ""is_genuine_ai"": true,
+  ""false_positive_reason"": null,
+  ""ai_technique"": ""classical_ml"",
+  ""application_domain"": ""nlp_text"",
+  ""data_modality"": ""text_language"",
+  ""innovation_orientation"": ""applied"",
+  ""core_ai_task"": ""optimization_planning"",
+  ""contribution_type"": ""application_implementation"",
+  ""training_paradigm"": ""not_specified"",
+  ""is_llm_related"": false,
+  ""confidence"": ""medium"",
+  ""reasoning"": ""The invention applies AI techniques to a specific problem of author anonymization in text, making it domain-specific.""
+}"
+149-932-831-402-910,2020.0,Identification of fonts in an application,"Systems and techniques for identification of fonts include receiving a selection of an area of an image including text, where the selection is received from within an application. The selected area of the image is input to a font matching module within the application. The font matching module ident...",True,,computer_vision_cnn,consumer_electronics,image_video,applied,classification_detection,application_implementation,not_specified,False,high,"The invention applies a convolutional neural network specifically for font identification, which is a domain-specific application of AI.","{
+  ""is_genuine_ai"": true,
+  ""false_positive_reason"": null,
+  ""ai_technique"": ""computer_vision_cnn"",
+  ""application_domain"": ""consumer_electronics"",
+  ""data_modality"": ""image_video"",
+  ""innovation_orientation"": ""applied"",
+  ""core_ai_task"": ""classification_detection"",
+  ""contribution_type"": ""application_implementation"",
+  ""training_paradigm"": ""not_specified"",
+  ""is_llm_related"": false,
+  ""confidence"": ""high"",
+  ""reasoning"": ""The invention applies a convolutional neural network specifically for font identification, which is a domain-specific application of AI.""
+}"
+196-024-903-212-499,2020.0,Identifying parameter image adjustments using image variation and sequential processing,"Methods and systems are provided for identifying parameter image adjustments. In embodiments, a set of candidate parameter values associated with a parameter to be analyzed in association with an image is identified. Subsequently, the image is rendered in accordance with each candidate parameter val...",True,,neural_network_general,computer_vision_imaging,image_video,applied,optimization_planning,algorithmic,supervised,False,high,"The innovation primarily focuses on applying a neural network to optimize image adjustments, which is specific to the computer vision domain.","{
+  ""is_genuine_ai"": true,
+  ""false_positive_reason"": null,
+  ""ai_technique"": ""neural_network_general"",
+  ""application_domain"": ""computer_vision_imaging"",
+  ""data_modality"": ""image_video"",
+  ""innovation_orientation"": ""applied"",
+  ""core_ai_task"": ""optimization_planning"",
+  ""contribution_type"": ""algorithmic"",
+  ""training_paradigm"": ""supervised"",
+  ""is_llm_related"": false,
+  ""confidence"": ""high"",
+  ""reasoning"": ""The innovation primarily focuses on applying a neural network to optimize image adjustments, which is specific to the computer vision domain.""
+}"
+030-140-636-758-961,2021.0,SYSTEM AND METHOD FOR CONCURRENT TRAINING AND UPDATING OF MACHINE LEARNING MODELS AT EDGE NODES IN A PEER TO PEER NETWORK,A method for concurrent training and updating a machine learning (ML) model at an edge node in a peer to peer network using a certifying node is provided. The method includes performing an incremental training of the ML model by a first edge node based on one or more data points associated with a da...,True,,classical_ml,networking_infrastructure,sensor_tabular,applied,optimization_planning,system_integration,not_specified,False,medium,"The innovation primarily addresses a specific problem in the context of machine learning model training in a peer-to-peer network, indicating an applied orientation.","{
+  ""is_genuine_ai"": true,
+  ""false_positive_reason"": null,
+  ""ai_technique"": ""classical_ml"",
+  ""application_domain"": ""networking_infrastructure"",
+  ""data_modality"": ""sensor_tabular"",
+  ""innovation_orientation"": ""applied"",
+  ""core_ai_task"": ""optimization_planning"",
+  ""contribution_type"": ""system_integration"",
+  ""training_paradigm"": ""not_specified"",
+  ""is_llm_related"": false,
+  ""confidence"": ""medium"",
+  ""reasoning"": ""The innovation primarily addresses a specific problem in the context of machine learning model training in a peer-to-peer network, indicating an applied orientation.""
+}"
+059-695-098-834-016,2023.0,Unsupervised depth prediction neural networks,"A system for generating a depth output for an image is described. The system receives input images that depict the same scene, each input image including one or more potential objects. The system generates, for each input image, a respective background image and processes the background images to ge...",True,,neural_network_general,computer_vision_imaging,image_video,applied,prediction,algorithmic,unsupervised_selfsupervised,False,high,"The patent describes a specific application of neural networks for depth prediction in images, indicating an applied innovation orientation.","{
+  ""is_genuine_ai"": true,
+  ""false_positive_reason"": null,
+  ""ai_technique"": ""neural_network_general"",
+  ""application_domain"": ""computer_vision_imaging"",
+  ""data_modality"": ""image_video"",
+  ""innovation_orientation"": ""applied"",
+  ""core_ai_task"": ""prediction"",
+  ""contribution_type"": ""algorithmic"",
+  ""training_paradigm"": ""unsupervised_selfsupervised"",
+  ""is_llm_related"": false,
+  ""confidence"": ""high"",
+  ""reasoning"": ""The patent describes a specific application of neural networks for depth prediction in images, indicating an applied innovation orientation.""
+}"
+054-598-640-771-312,2015.0,METHOD AND SYSTEM FOR ROUTING MESSAGES AND CONNECTING USERS ASSOCIATED WITH LIVE-CONNECTED CONTENT,"According to one embodiment, a first request of a first user is received for communicating with an agent concerning a content item of a media presentation presented to the first user. In response, agents associated with the content identifier are identified. Status of the identified agents is determ...",False,The patent describes a messaging and user connection system without a core AI/ML component.,,,,,,,,False,high,"The invention focuses on routing messages and connecting users, which does not involve AI techniques.","{
+  ""is_genuine_ai"": false,
+  ""false_positive_reason"": ""The patent describes a messaging and user connection system without a core AI/ML component."",
+  ""ai_technique"": null,
+  ""application_domain"": null,
+  ""data_modality"": null,
+  ""innovation_orientation"": null,
+  ""core_ai_task"": null,
+  ""contribution_type"": null,
+  ""training_paradigm"": null,
+  ""is_llm_related"": false,
+  ""confidence"": ""high"",
+  ""reasoning"": ""The invention focuses on routing messages and connecting users, which does not involve AI techniques.""
+}"

@@ -1,0 +1,142 @@
+════════════════════════════════════════════════════════════
+  FULL PIPELINE RESULTS — SUMMARY STATISTICS
+════════════════════════════════════════════════════════════
+
+  Total patents classified :  1,209,215
+  Successful               :  1,209,215 (100.0%)
+  Genuine AI               :    207,112 (17.1%)
+  Non-genuine (filtered)   :  1,002,072 (82.9%)
+
+── AI Technique (top 10) ─────────────────────────────────
+ai_technique
+neural_network_general    115947
+computer_vision_cnn        21965
+transformer_llm            21805
+classical_ml               18428
+generative_model           10680
+speech_audio                6529
+reinforcement_learning      5630
+optimization                3653
+knowledge_graph             1617
+machine_learning             258
+
+── Application Domain (top 10) ───────────────────────────
+application_domain
+computer_vision_imaging      39221
+nlp_text                     30763
+healthcare_medical           20262
+autonomous_systems           20065
+ai_methods_infrastructure    19742
+consumer_electronics         17348
+industrial_manufacturing     10925
+speech_audio                  9769
+security_privacy              7941
+finance_business              4019
+
+── Innovation Orientation ────────────────────────────────
+innovation_orientation
+applied        175017
+fundamental     32087
+both                8
+
+── Core AI Task ──────────────────────────────────────────
+core_ai_task
+classification_detection    132435
+generation                   29796
+optimization_planning        23678
+prediction                   12801
+optimization                  4932
+control                       2550
+decision_support               306
+other                          211
+not_applicable                  10
+preprocessing                    9
+simulation                       7
+monitoring                       6
+tracking                         5
+transformation                   5
+translation                      4
+data_preprocessing               3
+embedding                        2
+fusion                           2
+data_augmentation                2
+selection                        2
+transcription                    1
+processing                       1
+classification                   1
+conversion                       1
+forecasting                      1
+
+── Contribution Type ─────────────────────────────────────
+contribution_type
+algorithmic                   84045
+application_implementation    81196
+system_integration            21427
+architectural                 20190
+data_method                     254
+
+── Training Paradigm ─────────────────────────────────────
+training_paradigm
+supervised                                75945
+not_specified                             57333
+unsupervised_selfsupervised               24373
+reinforcement_learning                     1993
+unsupervised                                303
+few_shot_zeroshot                           106
+federated_learning                           40
+unsupervised_learning                        29
+transfer_learning                            21
+supervised_unsupervised_selfsupervised       18
+semi_supervised                              18
+evolutionary                                 11
+machine_learning                              9
+active_learning                               6
+self_supervised                               5
+meta_learning                                 5
+self_learning                                 4
+weakly_supervised                             3
+semi-supervised                               3
+supervised_selfsupervised                     3
+selfsupervised                                3
+transductive                                  2
+few_shot_selfsupervised                       2
+evolutionary_computing                        2
+multitask                                     1
+supervised_unsupervised                       1
+active                                        1
+learning-based                                1
+ensemble_learning                             1
+distributed_learning                          1
+partially_supervised                          1
+machine-learnt                                1
+semi-supervised_selfsupervised                1
+fine_tuning                                   1
+distributed/federated                         1
+off-policy                                    1
+machine_learning_model                        1
+inverse_reinforcement_learning                1
+adaptive_learning                             1
+evolutionary_computation                      1
+evolutionary_optimization                     1
+
+── Confidence ────────────────────────────────────────────
+confidence
+medium    147681
+high       59431
+
+── Genuine AI by Year ────────────────────────────────────
+year
+2010     3277
+2011     3633
+2012     4671
+2013     5584
+2014     6751
+2015     7364
+2016     8265
+2017     9907
+2018    12094
+2019    18153
+2020    24835
+2021    29735
+2022    34216
+2023    38627
