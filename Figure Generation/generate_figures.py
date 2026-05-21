@@ -158,7 +158,7 @@ label_y = {
     'optimization':             550,
 }
 
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(11, 10))
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(11, 7))
 
 # Panel A: share
 bottom = np.zeros(len(years_t))
