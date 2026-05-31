@@ -4,12 +4,14 @@ Reproduces all figures for:
   "LLM-Assisted Patent Analytics for Mapping AI Innovation Trends"
   Swayam Chadha, LMU Munich, 2026
 
-Input:  /mnt/user-data/uploads/classifications_final.csv
+Input:  classifications_final.csv
+        epo_results.csv  (for fig6)
 Output: figures/fig1_growth.pdf/.png
         figures/fig2_technique.pdf/.png
         figures/fig3_domains.pdf/.png
         figures/fig4_orientation.pdf/.png
         figures/fig5_heatmap.pdf/.png
+        figures/fig6_epo_comparison.pdf/.png
 
 Usage:
     python generate_figures.py
@@ -25,7 +27,7 @@ from scipy.stats import linregress
 # ── Output directory ───────────────────────────────────────────────────────
 os.makedirs('figures', exist_ok=True)
 
-# ── Load data ──────────────────────────────────────────────────────────────
+# ── Load USPTO data ────────────────────────────────────────────────────────
 df = pd.read_csv('classifications_final.csv', low_memory=False)
 genuine = df[df['is_genuine_ai'] == True].copy()
 total = len(genuine)
@@ -82,14 +84,13 @@ x0      = 2010
 def exp_func(x, a, b):
     return a * np.exp(b * (x - x0))
 
-popt, _   = curve_fit(exp_func, years, counts, p0=[3000, 0.2])
-r_all     = popt[1]
+popt, _    = curve_fit(exp_func, years, counts, p0=[3000, 0.2])
+r_all      = popt[1]
 growth_all = (np.exp(r_all) - 1) * 100
-r2_all    = 1 - np.sum((counts - exp_func(years, *popt))**2) / \
-              np.sum((counts - counts.mean())**2)
+r2_all     = 1 - np.sum((counts - exp_func(years, *popt))**2) / \
+               np.sum((counts - counts.mean())**2)
 
-x_smooth = np.linspace(2010, 2023, 300)
-
+x_smooth   = np.linspace(2010, 2023, 300)
 count_2019 = int(by_year[2019])
 count_2020 = int(by_year[2020])
 jump       = count_2020 - count_2019
@@ -105,7 +106,6 @@ ax.plot(x_smooth, exp_func(x_smooth, *popt), color='#c0392b', linewidth=2,
         zorder=3,
         label=f'Exponential fit: r = {r_all:.3f} yr$^{{-1}}$ '
               f'({growth_all:.1f}%/yr, $R^2$ = {r2_all:.3f})')
-
 ax.annotate('', xy=(2020, count_2020 + 500), xytext=(2020, count_2019 + 500),
             arrowprops=dict(arrowstyle='<->', color='#2c3e50', lw=1.5))
 ax.text(2020.35, (count_2019 + count_2020) / 2,
@@ -117,7 +117,6 @@ ax.text(2014.5, 38000,
 ax.text(2021.5, 38000,
         f'Avg. +{post_avg:.0f} patents/yr\n(2020–2023)',
         fontsize=8.5, ha='center', color='#c0392b', fontweight='bold')
-
 ax.set_xlabel('Publication year', fontsize=12)
 ax.set_ylabel('Genuine AI patents', fontsize=12)
 ax.set_xticks(years)
@@ -160,7 +159,6 @@ label_y = {
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(11, 7))
 
-# Panel A: share
 bottom = np.zeros(len(years_t))
 for tech in stack_order:
     vals = shares[tech].values
@@ -177,7 +175,6 @@ ax1.spines['top'].set_visible(False)
 ax1.spines['right'].set_visible(False)
 ax1.tick_params(labelsize=9)
 
-# Panel B: absolute log scale
 for tech in line_techs:
     vals = by_year_tech[tech].values
     lw = 2.5 if tech == 'neural_network_general' else 1.8
@@ -287,7 +284,6 @@ fund_vals    = by_year_pct['fundamental'].values \
                if 'fundamental' in by_year_pct else np.zeros(len(years_o))
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 3.5))
-
 ax1.stackplot(years_o, applied_vals, fund_vals,
               labels=['Applied', 'Fundamental'],
               colors=['#2e75b6', '#f4a261'], alpha=0.9)
@@ -365,10 +361,10 @@ HEATMAP_DOMAIN_LABELS = {
     'speech_audio':              'Speech\n& audio',
 }
 
-sub  = genuine[genuine['tech_grouped2'].isin(TOP_TECHS) &
-               genuine['application_domain'].isin(TOP_DOMAINS)]
-heat = sub.groupby(['tech_grouped2', 'application_domain']).size().unstack(fill_value=0)
-heat = heat.reindex(index=TOP_TECHS, columns=TOP_DOMAINS, fill_value=0)
+sub       = genuine[genuine['tech_grouped2'].isin(TOP_TECHS) &
+                    genuine['application_domain'].isin(TOP_DOMAINS)]
+heat      = sub.groupby(['tech_grouped2', 'application_domain']).size().unstack(fill_value=0)
+heat      = heat.reindex(index=TOP_TECHS, columns=TOP_DOMAINS, fill_value=0)
 heat_norm = heat.div(heat.sum(axis=1), axis=0) * 100
 
 fig, ax = plt.subplots(figsize=(10, 5))
@@ -393,5 +389,131 @@ plt.savefig('figures/fig5_heatmap.pdf', bbox_inches='tight')
 plt.savefig('figures/fig5_heatmap.png', dpi=150, bbox_inches='tight')
 plt.close()
 print("  Done.")
+
+# ══════════════════════════════════════════════════════════════════════════
+# FIG 6 — USPTO vs EPO comparison
+# ══════════════════════════════════════════════════════════════════════════
+print("Generating fig6_epo_comparison...")
+
+import os as _os
+if not _os.path.exists('epo_results.csv'):
+    print("  epo_results.csv not found — skipping fig6")
+else:
+    epo = pd.read_csv('epo_results.csv')
+    epo['is_genuine_ai'] = epo['is_genuine_ai'].map(
+        {'True': True, 'False': False, True: True, False: False})
+    epo_genuine = epo[epo['is_genuine_ai'] == True].copy()
+
+    TECH_MAP_COMPARISON = {
+        'neural_network_general': 'Neural net\n(general)',
+        'computer_vision_cnn':    'CNN /\nconvolutional',
+        'transformer_llm':        'Transformer',
+        'classical_ml':           'Classical ML',
+        'generative_model':       'Generative\nmodel',
+        'speech_audio':           'Speech\n& audio',
+    }
+    genuine['tech_cmp']     = genuine['ai_technique'].map(TECH_MAP_COMPARISON)
+    epo_genuine['tech_cmp'] = epo_genuine['ai_technique'].map(TECH_MAP_COMPARISON)
+
+    years_all = list(range(2010, 2024))
+
+    uspto_by_year = genuine.groupby('year').size().reindex(years_all, fill_value=0)
+    epo_by_year   = epo_genuine.groupby('year').size().reindex(years_all, fill_value=0)
+    uspto_idx     = uspto_by_year / uspto_by_year[2010] * 100
+    epo_idx       = epo_by_year   / epo_by_year[2010]   * 100
+
+    def applied_share(df, years):
+        result = []
+        for y in years:
+            sub = df[df['year'] == y]
+            if len(sub) == 0:
+                result.append(np.nan)
+                continue
+            result.append((sub['innovation_orientation'] == 'applied').sum() / len(sub) * 100)
+        return result
+
+    uspto_applied = applied_share(genuine, years_all)
+    epo_applied   = applied_share(epo_genuine, years_all)
+    slope_u, int_u, *_ = linregress(years_all, uspto_applied)
+    slope_e, int_e, *_ = linregress(years_all, epo_applied)
+    trend_u = [int_u + slope_u * y for y in years_all]
+    trend_e = [int_e + slope_e * y for y in years_all]
+
+    techs_cmp = ['Neural net\n(general)', 'CNN /\nconvolutional', 'Classical ML',
+                 'Transformer', 'Speech\n& audio', 'Generative\nmodel']
+
+    def tech_shares(df, techs):
+        t = len(df)
+        return [df[df['tech_cmp'] == tc].shape[0] / t * 100 for tc in techs]
+
+    uspto_tech = tech_shares(genuine, techs_cmp)
+    epo_tech   = tech_shares(epo_genuine, techs_cmp)
+
+    USPTO_COLOR = '#1f4e79'
+    EPO_COLOR   = '#c0392b'
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+    ax = axes[0]
+    ax.plot(years_all, uspto_idx.values, color=USPTO_COLOR, lw=2.2,
+            marker='o', markersize=4, label='USPTO')
+    ax.plot(years_all, epo_idx.values,   color=EPO_COLOR,   lw=2.2,
+            marker='s', markersize=4, label='EPO')
+    ax.set_xlabel('Publication year', fontsize=10)
+    ax.set_ylabel('Growth index (2010 = 100)', fontsize=10)
+    ax.set_title('(a) Genuine AI patents — growth index', fontsize=10, loc='left')
+    ax.legend(fontsize=9, frameon=False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.set_xlim(2010, 2023)
+    ax.tick_params(labelsize=8)
+    ax.set_xticks(years_all[::2])
+
+    ax = axes[1]
+    ax.plot(years_all, uspto_applied, color=USPTO_COLOR, lw=2.2,
+            marker='o', markersize=4, label='USPTO')
+    ax.plot(years_all, epo_applied,   color=EPO_COLOR,   lw=2.2,
+            marker='s', markersize=4, label='EPO')
+    ax.plot(years_all, trend_u, color=USPTO_COLOR, lw=1.2, linestyle='--', alpha=0.7)
+    ax.plot(years_all, trend_e, color=EPO_COLOR,   lw=1.2, linestyle='--', alpha=0.7)
+    ax.set_xlabel('Publication year', fontsize=10)
+    ax.set_ylabel('Applied patents (%)', fontsize=10)
+    ax.set_title('(b) Innovation orientation — applied share', fontsize=10, loc='left')
+    ax.legend(fontsize=9, frameon=False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.set_xlim(2010, 2023)
+    ax.set_ylim(50, 100)
+    ax.tick_params(labelsize=8)
+    ax.set_xticks(years_all[::2])
+
+    ax = axes[2]
+    x      = np.arange(len(techs_cmp))
+    width  = 0.35
+    bars_u = ax.barh(x + width/2, uspto_tech, width,
+                     color=USPTO_COLOR, alpha=0.85, label='USPTO')
+    bars_e = ax.barh(x - width/2, epo_tech,   width,
+                     color=EPO_COLOR,   alpha=0.85, label='EPO')
+    ax.set_yticks(x)
+    ax.set_yticklabels(techs_cmp, fontsize=8.5)
+    ax.set_xlabel('Share of genuine AI patents (%)', fontsize=10)
+    ax.set_title('(c) Technique composition — USPTO vs EPO', fontsize=10, loc='left')
+    ax.legend(fontsize=9, frameon=False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.tick_params(left=False, labelsize=8)
+    for b, v in zip(bars_u, uspto_tech):
+        ax.text(v + 0.3, b.get_y() + b.get_height()/2, f'{v:.1f}%',
+                va='center', fontsize=7.5, color=USPTO_COLOR)
+    for b, v in zip(bars_e, epo_tech):
+        ax.text(v + 0.3, b.get_y() + b.get_height()/2, f'{v:.1f}%',
+                va='center', fontsize=7.5, color=EPO_COLOR)
+
+    plt.tight_layout(pad=1.5)
+    plt.savefig('figures/fig6_epo_comparison.pdf', bbox_inches='tight')
+    plt.savefig('figures/fig6_epo_comparison.png', dpi=150, bbox_inches='tight')
+    plt.close()
+    print("  Done.")
 
 print("\nAll figures saved to figures/")
