@@ -517,3 +517,67 @@ else:
     print("  Done.")
 
 print("\nAll figures saved to figures/")
+
+# ══════════════════════════════════════════════════════════════════════════
+# FIG 7 — Emerging AI techniques (keyword search in reasoning field)
+# ══════════════════════════════════════════════════════════════════════════
+print("Generating fig7_emerging_tech...")
+
+EMERGING = {
+    'Foundation models / LLMs': r'foundation.model|large.language.model|llm\b|gpt|bert|pre.?trained.{0,20}model',
+    'Federated learning':        r'federated.learning|federated.{0,10}train',
+    'Agents / agentic AI':       r'\bagent\b|agentic|multi.?agent',
+    'Model distillation':        r'distill',
+}
+EMERG_COLORS = {
+    'Foundation models / LLMs': '#1f4e79',
+    'Federated learning':        '#c0392b',
+    'Agents / agentic AI':       '#2e8b57',
+    'Model distillation':        '#e07b39',
+}
+
+years_e   = list(range(2010, 2024))
+by_year_e = genuine.groupby('year').size()
+raw_e, norm_e = {}, {}
+for label, pattern in EMERGING.items():
+    counts = []
+    for y in years_e:
+        sub  = genuine[genuine['year'] == y]
+        mask = sub['reasoning'].fillna('').str.lower().str.contains(pattern, regex=True)
+        counts.append(mask.sum())
+    raw_e[label]  = counts
+    norm_e[label] = [c / by_year_e[y] * 1000 for c, y in zip(counts, years_e)]
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
+for label, counts in raw_e.items():
+    ax1.plot(years_e, counts, color=EMERG_COLORS[label], lw=2,
+             marker='o', markersize=4, label=label)
+ax1.set_xlabel('Publication year', fontsize=10)
+ax1.set_ylabel('Patent mentions (count)', fontsize=10)
+ax1.set_title('(a) Absolute mentions in LLM reasoning field', fontsize=10, loc='left')
+ax1.legend(fontsize=8.5, frameon=False)
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+ax1.set_xlim(2010, 2023)
+ax1.tick_params(labelsize=8)
+ax1.set_xticks(years_e[::2])
+
+for label, counts in norm_e.items():
+    ax2.plot(years_e, counts, color=EMERG_COLORS[label], lw=2,
+             marker='o', markersize=4, label=label)
+ax2.set_xlabel('Publication year', fontsize=10)
+ax2.set_ylabel('Mentions per 1,000 genuine AI patents', fontsize=10)
+ax2.set_title('(b) Normalised emergence rate', fontsize=10, loc='left')
+ax2.legend(fontsize=8.5, frameon=False)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+ax2.set_xlim(2010, 2023)
+ax2.tick_params(labelsize=8)
+ax2.set_xticks(years_e[::2])
+
+plt.tight_layout(pad=1.5)
+plt.savefig('figures/fig7_emerging_tech.pdf', bbox_inches='tight')
+plt.savefig('figures/fig7_emerging_tech.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("  Done.")
+print("All 7 figures saved to figures/")
