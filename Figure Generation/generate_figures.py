@@ -419,9 +419,6 @@ else:
 
     uspto_by_year = genuine.groupby('year').size().reindex(years_all, fill_value=0)
     epo_by_year   = epo_genuine.groupby('year').size().reindex(years_all, fill_value=0)
-    uspto_idx     = uspto_by_year / uspto_by_year[2010] * 100
-    epo_idx       = epo_by_year   / epo_by_year[2010]   * 100
-
     def applied_share(df, years):
         result = []
         for y in years:
@@ -455,19 +452,23 @@ else:
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
     ax = axes[0]
-    ax.plot(years_all, uspto_idx.values, color=USPTO_COLOR, lw=2.2,
-            marker='o', markersize=4, label='USPTO')
-    ax.plot(years_all, epo_idx.values,   color=EPO_COLOR,   lw=2.2,
-            marker='s', markersize=4, label='EPO')
+    ax.plot(years_all, uspto_by_year.values, color=USPTO_COLOR, lw=2.2,
+            marker='o', markersize=4, label=f'USPTO (n={len(genuine):,})')
+    ax.plot(years_all, epo_by_year.values,   color=EPO_COLOR,   lw=2.2,
+            marker='s', markersize=4, label=f'EPO (n={len(epo_genuine):,})')
+    ax.set_yscale('log')
     ax.set_xlabel('Publication year', fontsize=10)
-    ax.set_ylabel('Growth index (2010 = 100)', fontsize=10)
-    ax.set_title('(a) Genuine AI patents — growth index', fontsize=10, loc='left')
+    ax.set_ylabel('Genuine AI patents (log scale)', fontsize=10)
+    ax.set_title('(a) Annual genuine AI patent counts', fontsize=10, loc='left')
     ax.legend(fontsize=9, frameon=False)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.set_xlim(2010, 2023)
     ax.tick_params(labelsize=8)
     ax.set_xticks(years_all[::2])
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(
+        lambda x, _: f"{int(x/1000)}k" if x >= 1000 else str(int(x))))
+    ax.grid(axis='y', which='both', alpha=0.12, lw=0.5)
 
     ax = axes[1]
     ax.plot(years_all, uspto_applied, color=USPTO_COLOR, lw=2.2,
@@ -524,10 +525,23 @@ print("\nAll figures saved to figures/")
 print("Generating fig7_emerging_tech...")
 
 EMERGING = {
-    'Foundation models / LLMs': r'foundation.model|large.language.model|llm\b|gpt|bert|pre.?trained.{0,20}model',
-    'Federated learning':        r'federated.learning|federated.{0,10}train',
-    'Agents / agentic AI':       r'\bagent\b|agentic|multi.?agent',
-    'Model distillation':        r'distill',
+    'Foundation models / LLMs': (
+        r'language.model|large.language|llm\b|foundation.model|gpt\b|bert\b|'
+        r'pre.?trained.{0,20}model|generative.pre.?train|instruction.tun|'
+        r'chat.model|transformer.model'
+    ),
+    'Federated learning': (
+        r'federated.learn|federated.train|federated.optim|'
+        r'federat\w+.aggregat|split.learning'
+    ),
+    'Agents / agentic AI': (
+        r'\bagent\b|agentic|multi.?agent|autonomous.agent|'
+        r'tool.?use|tool.?call|planning.agent|llm.agent'
+    ),
+    'Model distillation': (
+        r'distill|knowledge.transfer.{0,20}model|'
+        r'teacher.student|student.model|model.compression'
+    ),
 }
 EMERG_COLORS = {
     'Foundation models / LLMs': '#1f4e79',
