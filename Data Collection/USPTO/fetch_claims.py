@@ -12,16 +12,8 @@ DOWNLOAD_DIR     = os.path.expanduser("~/Downloads/patentsview_claims")
 YEARS            = list(range(2010, 2024))          # 2010–2023 inclusive
 KEEP_ZIPS        = False                             # set True to keep zip files after extraction
 
-# PatentsView URL patterns — correct base is data.patentsview.org (not patentsview.org)
-# Primary S3 bucket (confirmed working as of early 2026)
 GRANTED_URL   = "https://s3.amazonaws.com/data.patentsview.org/claims/g_claims_{year}.tsv.zip"
 PREGRANT_URL  = "https://s3.amazonaws.com/data.patentsview.org/pregrant_publications/pg_claims_{year}.tsv.zip"
-
-# NOTE: PatentsView is migrating to USPTO Open Data Portal (data.uspto.gov) on March 20, 2026.
-# If the above URLs 404, the files are also available via Academic Torrents (full mirror):
-# https://academictorrents.com/details/2c6eb904b11a8e188c59e5e5ffdd06562950d84b
-# Or manually download from: https://patentsview.org/download/claims
-# and place as ~/Downloads/patentsview_claims/g_claims_YYYY.tsv.zip
 
 # ── STEP 1: LOAD AIPD UNIVERSE & SPLIT BY ID TYPE ────────────────────────────
 print("Loading AIPD universe...")
