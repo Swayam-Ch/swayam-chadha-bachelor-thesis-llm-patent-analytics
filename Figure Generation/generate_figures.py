@@ -5,7 +5,7 @@ Reproduces all figures for:
   Swayam Chadha, LMU Munich, 2026
 
 Input:  classifications_final.csv
-        epo_results.csv  (for fig6)
+        epo_results_qwen_bigquery.csv  (for fig6)
 Output: figures/fig1_growth.pdf/.png
         figures/fig2_technique.pdf/.png
         figures/fig3_domains.pdf/.png
@@ -396,10 +396,10 @@ print("  Done.")
 print("Generating fig6_epo_comparison...")
 
 import os as _os
-if not _os.path.exists('epo_results.csv'):
-    print("  epo_results.csv not found — skipping fig6")
+if not _os.path.exists('epo_results_qwen_bigquery.csv'):
+    print("  epo_results_qwen_bigquery.csv not found — skipping fig6")
 else:
-    epo = pd.read_csv('epo_results.csv')
+    epo = pd.read_csv('epo_results_qwen_bigquery.csv')
     epo['is_genuine_ai'] = epo['is_genuine_ai'].map(
         {'True': True, 'False': False, True: True, False: False})
     epo_genuine = epo[epo['is_genuine_ai'] == True].copy()
@@ -517,7 +517,6 @@ else:
     plt.close()
     print("  Done.")
 
-print("\nAll figures saved to figures/")
 
 # ══════════════════════════════════════════════════════════════════════════
 # FIG 7 — Emerging AI techniques (keyword search in reasoning field)
