@@ -25,7 +25,7 @@ This repository contains all code, prompts, validation data, and figures for my 
 swayam-chadha-bachelor-thesis-llm-patent-analytics/
 │
 ├── data_collection/
-│   ├── uspto/                  # USPTO classification pipeline
+│   ├── USPTO/                  # USPTO classification pipeline
 │   │   ├── fetch_abstracts.py
 │   │   ├── fetch_claims.py
 │   │   ├── merge_claims.py
@@ -34,11 +34,11 @@ swayam-chadha-bachelor-thesis-llm-patent-analytics/
 │   │   ├── qwen_vllm_classify.py
 │   │   ├── preview_results.py
 │   │   └── prompt.txt
-│   ├── epo/                    # EPO extension pipeline
+│   ├── EPO/                    # EPO extension pipeline
 │   │   ├── bigquery_epo_patents.py
 │   │   ├── filter_epo_priority.py
 │   │   └── qwen_classify_epo.py
-│   └── validation/             # Validation data files
+│   └── Validation/             # Validation data files
 │       ├── validation_sample_batch2.csv
 │       ├── batch2_lens_complete.csv
 │       └── batch2_results_v2.csv
@@ -125,7 +125,7 @@ cd figure_generation
 
 # Place classifications_final.csv and epo_results_qwen_bigquery.csv here
 python generate_figures.py
-# Outputs: figures/fig1_growth.pdf ... figures/fig7_emerging_tech.pdf
+# Outputs: Figures/fig1_growth.pdf ... Figures/fig7_emerging_tech.pdf
 ```
 
 ---
