@@ -50,7 +50,6 @@ df["has_claim"]    = df["claim1_text"].notna()
 df["has_both"]     = df["has_abstract"] & df["has_claim"]
 
 # 5. Truncate claim text to ~800 chars to control LLM token usage
-# (first independent claim is often very long; 800 chars captures the core scope)
 MAX_CLAIM_CHARS = 800
 df["claim1_text_truncated"] = df["claim1_text"].str[:MAX_CLAIM_CHARS]
 
