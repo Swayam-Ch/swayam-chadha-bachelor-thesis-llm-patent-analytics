@@ -24,7 +24,7 @@ This repository contains all code, prompts, validation data, and figures for my 
 ```
 swayam-chadha-bachelor-thesis-llm-patent-analytics/
 │
-├── data_collection/
+├── Data Collection/
 │   ├── USPTO/                  # USPTO classification pipeline
 │   │   ├── fetch_abstracts.py
 │   │   ├── fetch_claims.py
@@ -43,9 +43,9 @@ swayam-chadha-bachelor-thesis-llm-patent-analytics/
 │       ├── batch2_lens_complete.csv
 │       └── batch2_results_v2.csv
 │
-├── figure_generation/
+├── Figure Generation/
 │   ├── generate_figures.py     # Reproduces all 7 figures
-│   └── figures/                # Pre-generated PDFs
+│   └── Figures/                # Pre-generated PDFs
 │       ├── fig1_growth.pdf
 │       ├── fig2_technique.pdf
 │       ├── fig3_domains.pdf
@@ -54,7 +54,7 @@ swayam-chadha-bachelor-thesis-llm-patent-analytics/
 │       ├── fig6_epo_comparison.pdf
 │       └── fig7_emerging_tech.pdf
 │
-├── thesis/
+├── Thesis/
 │   ├── thesis_main.tex
 │   └── references.bib
 │
