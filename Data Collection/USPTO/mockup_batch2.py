@@ -31,7 +31,7 @@ innovation_orientation:
   - "both": ONLY when technique is specifically shaped by AND inseparable from its domain (~10-15%)
 If is_genuine_ai is false, set all other fields (except false_positive_reason) to null."""
 
-client = openai.OpenAI(api_key="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")
+client = openai.OpenAI(api_key="")
 df = pd.read_csv(INPUT_CSV)
 print(f"Loaded {len(df)} patents")
 
