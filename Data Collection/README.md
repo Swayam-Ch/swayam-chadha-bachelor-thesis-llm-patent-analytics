@@ -54,7 +54,7 @@ epo_bigquery_candidates.csv   →   epo_candidates_v4.csv
 
 ---
 
-## uspto/ — USPTO Classification Pipeline
+## USPTO/ — USPTO Classification Pipeline
 
 | File | Description |
 |------|-------------|
@@ -69,7 +69,7 @@ epo_bigquery_candidates.csv   →   epo_candidates_v4.csv
 
 ---
 
-## epo/ — EPO Extension Pipeline
+## EPO/ — EPO Extension Pipeline
 
 Requires: free Google Cloud account (BigQuery) + free EPO OPS API key from https://developers.epo.org
 
@@ -81,7 +81,7 @@ Requires: free Google Cloud account (BigQuery) + free EPO OPS API key from https
 
 ---
 
-## validation/ — Validation Data
+## Validation/ — Validation Data
 
 | File | Description |
 |------|-------------|
