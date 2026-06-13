@@ -8,7 +8,7 @@ MODEL_PATH    = os.path.expanduser("~/qwen2.5-7b")
 INPUT_CSV     = os.path.expanduser("~/llm_input_with_claims.csv")
 RESULTS_DIR   = os.path.expanduser("~/results")
 CHECKPOINT_N  = 10_000
-BATCH_SIZE    = 256   # vLLM handles large batches efficiently
+BATCH_SIZE    = 256
 MAX_TOKENS    = 400
 
 Path(RESULTS_DIR).mkdir(exist_ok=True)
@@ -91,7 +91,6 @@ print("Loading data...")
 df = pd.read_csv(INPUT_CSV, dtype=str, low_memory=False)
 print(f"  Total: {len(df):,}")
 
-# Resume logic
 checkpoint_files = sorted(Path(RESULTS_DIR).glob("checkpoint_*.csv"))
 processed_ids, prior_results = set(), []
 if checkpoint_files:
