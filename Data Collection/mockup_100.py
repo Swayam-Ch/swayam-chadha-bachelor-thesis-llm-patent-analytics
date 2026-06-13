@@ -72,14 +72,11 @@ USER_TEMPLATE = "Title: {title}\n\nAbstract: {abstract}"
 # ── STEP 1: LOAD & MERGE EXISTING DATA ───────────────────────────────────────
 print("Loading existing data...")
 
-# Load v4 classifications (patent_id = Lens ID format)
 merged = pd.read_csv(CLASSIFICATIONS_CSV)
 print(f"  Classifications: {len(merged)} rows from {CLASSIFICATIONS_CSV}")
 
-# patent_id in llm_500_final_corrected.csv is the Lens ID — rename directly
 merged = merged.rename(columns={"patent_id": "Lens ID"})
 
-# Join year from bridge (Lens ID -> year)
 bridge = pd.read_csv(BRIDGE_CSV)[["Lens ID", "year"]].drop_duplicates("Lens ID")
 merged = merged.merge(bridge, on="Lens ID", how="left")
 print(f"  After year join: {merged['year'].notna().sum()}/{len(merged)} have year")
@@ -133,7 +130,6 @@ def fetch_abstracts_from_api(lens_ids, api_key, batch_size=50):
     return pd.DataFrame(results)
 
 
-# Normalize column names: find whichever col contains 'lens'+'id' and rename to 'Lens ID'
 def normalize_lens_col(frame, label):
     for col in frame.columns:
         if "lens" in col.lower() and "id" in col.lower():
@@ -323,9 +319,6 @@ if len(genuine) > 0:
         print(f"    {agree}/{len(both)} agree ({agree/len(both)*100:.1f}%)")
 
 
-# ── STEP 7: PROFESSOR SAMPLE (10 patents) ─────────────────────────────────────
-# All genuine AI patents from this run + enough non-genuine to reach 10
-# Shows professor: full range of orientations, techniques, and a false positive
 print(f"\nBuilding professor review sample (n={PROFESSOR_N})...")
 
 sample_parts = []
@@ -347,7 +340,6 @@ professor_sample = pd.concat(sample_parts).head(PROFESSOR_N).reset_index(drop=Tr
 print(f"  Genuine AI in sample: {professor_sample['is_genuine_ai'].sum()}")
 print(f"  Non-genuine in sample: {(~professor_sample['is_genuine_ai']).sum()}")
 
-# For the professor sample: include full abstract (not truncated) and raw_response
 prof_cols = [
     "patent_id", "Lens ID", "year", "title", "abstract",
     "is_genuine_ai", "false_positive_reason",
