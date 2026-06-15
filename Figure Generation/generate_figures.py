@@ -7,6 +7,7 @@ Reproduces all figures for:
 Input:  classifications_final.csv
         epo_results_qwen_bigquery.csv  (for fig6)
 Output: figures/fig1_growth.pdf/.png
+        figures/fig8_regression.pdf/.png
         figures/fig2_technique.pdf/.png
         figures/fig3_domains.pdf/.png
         figures/fig4_orientation.pdf/.png
@@ -593,4 +594,104 @@ plt.savefig('figures/fig7_emerging_tech.pdf', bbox_inches='tight')
 plt.savefig('figures/fig7_emerging_tech.png', dpi=150, bbox_inches='tight')
 plt.close()
 print("  Done.")
-print("All 7 figures saved to figures/")
+
+# ══════════════════════════════════════════════════════════════════════════
+# FIG 8 — Regression analysis of AI patent growth
+# ══════════════════════════════════════════════════════════════════════════
+print("Generating fig8_regression...")
+
+try:
+    import statsmodels.formula.api as smf
+except ImportError:
+    print("  statsmodels not installed — run: pip install statsmodels")
+    print("  Skipping fig8.")
+else:
+    # Macro controls
+    ai_investment = {2010:1.7,2011:2.1,2012:2.8,2013:3.7,2014:6.9,2015:12.7,
+                     2016:17.0,2017:24.6,2018:40.4,2019:36.0,2020:36.8,
+                     2021:93.5,2022:47.4,2023:67.2}
+    us_rd = {2010:2.74,2011:2.77,2012:2.70,2013:2.72,2014:2.73,2015:2.72,
+             2016:2.77,2017:2.83,2018:2.83,2019:2.84,2020:3.08,
+             2021:3.46,2022:3.56,2023:3.60}
+
+    reg = genuine.groupby('year').size().reset_index()
+    reg.columns = ['year', 'genuine_ai_patents']
+    reg['ai_investment'] = reg['year'].map(ai_investment)
+    reg['rd_pct_gdp']    = reg['year'].map(us_rd)
+    reg['covid']         = reg['year'].isin([2020, 2021]).astype(int)
+    reg['time_trend']    = reg['year'] - 2010
+    reg['log_patents']   = np.log(reg['genuine_ai_patents'])
+    reg['log_ai_inv']    = np.log(reg['ai_investment'])
+
+    m1 = smf.ols('log_patents ~ time_trend', data=reg).fit()
+    m3 = smf.ols('log_patents ~ time_trend + covid + log_ai_inv', data=reg).fit()
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+
+    ax = axes[0]
+    ax.axvspan(2019.5, 2021.5, color='#f0e0a0', alpha=0.4, zorder=0)
+    ax.text(2020.5, 500, 'COVID', ha='center', fontsize=8, color='#888800')
+    ax.plot(reg['year'], np.exp(m1.fittedvalues), color='#aaaaaa', lw=1.8,
+            linestyle='--', label=f'M1: time trend only ($R^2$={m1.rsquared:.3f})',
+            zorder=2)
+    ax.plot(reg['year'], np.exp(m3.fittedvalues), color='#c0392b', lw=2.2,
+            linestyle='-',
+            label=f'M3: +COVID +AI investment ($R^2$={m3.rsquared:.3f})', zorder=3)
+    ax.scatter(reg['year'], reg['genuine_ai_patents'], color='#1f4e79', s=55,
+               label='Observed', zorder=4)
+    ax.set_xlabel('Publication year', fontsize=10)
+    ax.set_ylabel('Genuine AI patents', fontsize=10)
+    ax.set_title('(a) Observed vs model fit', fontsize=10, loc='left')
+    ax.legend(fontsize=8.5, frameon=False)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.set_xlim(2009.5, 2023.5)
+    ax.set_xticks(range(2010, 2024, 2))
+    ax.yaxis.set_major_formatter(
+        plt.FuncFormatter(lambda x, _: f'{int(x/1000)}k' if x >= 1000 else str(int(x))))
+
+    ax = axes[1]
+    coefs = m3.params.drop('Intercept')
+    cis   = m3.conf_int().drop('Intercept')
+    pvals = m3.pvalues.drop('Intercept')
+    labels = {
+        'time_trend':  'Time trend\n(years since 2010)',
+        'covid':       'COVID-19\n(2020-2021 dummy)',
+        'log_ai_inv':  'AI private investment\n(log, US$bn)'
+    }
+    order  = ['log_ai_inv', 'covid', 'time_trend']
+    y      = np.arange(len(order))
+    colors = ['#c0392b' if pvals[k] < 0.05 else '#cccccc' for k in order]
+    ax.barh(y, [coefs[k] for k in order], color=colors, height=0.45, alpha=0.85)
+    ax.errorbar(
+        [coefs[k] for k in order], y,
+        xerr=[
+            [coefs[k] - cis.loc[k, 0] for k in order],
+            [cis.loc[k, 1] - coefs[k] for k in order]
+        ],
+        fmt='none', color='#333333', lw=1.5, capsize=4
+    )
+    ax.axvline(0, color='#333333', lw=0.8, linestyle='--')
+    ax.set_yticks(y)
+    ax.set_yticklabels([labels[k] for k in order], fontsize=9)
+    ax.set_xlabel('Coefficient (log genuine AI patents)', fontsize=10)
+    ax.set_title('(b) M3 coefficients with 95% CI\n(controlling for secular time trend)',
+                 fontsize=10, loc='left')
+    for i, k in enumerate(order):
+        p   = pvals[k]
+        sig = '***' if p<0.001 else '**' if p<0.01 else '*' if p<0.05 else 'n.s.'
+        ax.text(cis.loc[k, 1] + 0.005, i, sig, va='center', fontsize=9,
+                color='#c0392b' if p<0.05 else '#888888')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.tick_params(left=False)
+    ax.set_xlim(-0.38, 0.42)
+
+    plt.tight_layout(pad=1.5)
+    plt.savefig('figures/fig8_regression.pdf', bbox_inches='tight')
+    plt.savefig('figures/fig8_regression.png', dpi=150, bbox_inches='tight')
+    plt.close()
+    print("  Done.")
+
+print("All 8 figures saved to figures/")
