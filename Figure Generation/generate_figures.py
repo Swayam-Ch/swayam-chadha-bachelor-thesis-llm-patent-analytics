@@ -8,6 +8,7 @@ Input:  classifications_final.csv
         epo_results_qwen_bigquery.csv  (for fig6)
 Output: figures/fig1_growth.pdf/.png
         figures/fig8_regression.pdf/.png
+        figures/fig9_country_breakdown.pdf/.png
         figures/fig2_technique.pdf/.png
         figures/fig3_domains.pdf/.png
         figures/fig4_orientation.pdf/.png
@@ -408,7 +409,7 @@ else:
     TECH_MAP_COMPARISON = {
         'neural_network_general': 'Neural net\n(general)',
         'computer_vision_cnn':    'CNN /\nconvolutional',
-        'transformer_llm':        'Transformer',
+        'transformer_llm':        'Transformer /\nattention',
         'classical_ml':           'Classical ML',
         'generative_model':       'Generative\nmodel',
         'speech_audio':           'Speech\n& audio',
@@ -438,7 +439,7 @@ else:
     trend_e = [int_e + slope_e * y for y in years_all]
 
     techs_cmp = ['Neural net\n(general)', 'CNN /\nconvolutional', 'Classical ML',
-                 'Transformer', 'Speech\n& audio', 'Generative\nmodel']
+                 'Transformer /\nattention', 'Speech\n& audio', 'Generative\nmodel']
 
     def tech_shares(df, techs):
         t = len(df)
@@ -596,7 +597,7 @@ plt.close()
 print("  Done.")
 
 # ══════════════════════════════════════════════════════════════════════════
-# FIG 8 — Regression analysis of AI patent growth
+# FIG 8 — Regression analysis: each office paired with own-jurisdiction investment
 # ══════════════════════════════════════════════════════════════════════════
 print("Generating fig8_regression...")
 
@@ -606,87 +607,106 @@ except ImportError:
     print("  statsmodels not installed — run: pip install statsmodels")
     print("  Skipping fig8.")
 else:
-    # Macro controls
-    ai_investment = {2010:1.7,2011:2.1,2012:2.8,2013:3.7,2014:6.9,2015:12.7,
-                     2016:17.0,2017:24.6,2018:40.4,2019:36.0,2020:36.8,
-                     2021:93.5,2022:47.4,2023:67.2}
-    us_rd = {2010:2.74,2011:2.77,2012:2.70,2013:2.72,2014:2.73,2015:2.72,
-             2016:2.77,2017:2.83,2018:2.83,2019:2.84,2020:3.08,
-             2021:3.46,2022:3.56,2023:3.60}
+    # US private AI investment (Stanford AI Index, billions USD)
+    us_investment = {
+        2010: 1.7, 2011: 2.1, 2012: 2.8, 2013: 3.7, 2014: 6.9, 2015: 12.7,
+        2016: 17.0, 2017: 24.6, 2018: 40.4, 2019: 36.0, 2020: 36.8,
+        2021: 93.5, 2022: 47.4, 2023: 67.2,
+    }
+    # EU-10 AI investment (millions EUR), OECD.AI / Preqin, 2015-2023
+    eu10_investment = {
+        2015: 29489.83, 2016: 33489.64, 2017: 39014.33, 2018: 46618.71,
+        2019: 71881.30, 2020: 85039.71, 2021: 102157.69, 2022: 128565.66,
+        2023: 126070.91,
+    }
+    # EPO genuine AI patent counts by year (from EPO BigQuery + Qwen classification)
+    epo_counts = {
+        2010: 766, 2011: 833, 2012: 872, 2013: 1043, 2014: 1252, 2015: 1370,
+        2016: 1643, 2017: 2009, 2018: 2537, 2019: 3579, 2020: 5173,
+        2021: 6398, 2022: 7294, 2023: 8032,
+    }
 
-    reg = genuine.groupby('year').size().reset_index()
-    reg.columns = ['year', 'genuine_ai_patents']
-    reg['ai_investment'] = reg['year'].map(ai_investment)
-    reg['rd_pct_gdp']    = reg['year'].map(us_rd)
-    reg['covid']         = reg['year'].isin([2020, 2021]).astype(int)
-    reg['time_trend']    = reg['year'] - 2010
-    reg['log_patents']   = np.log(reg['genuine_ai_patents'])
-    reg['log_ai_inv']    = np.log(reg['ai_investment'])
+    us_reg = genuine.groupby('year').size().reset_index()
+    us_reg.columns = ['year', 'genuine_ai_patents']
+    epo_reg = pd.DataFrame({'year': list(epo_counts.keys()),
+                             'genuine_ai_patents': list(epo_counts.values())})
 
-    m1 = smf.ols('log_patents ~ time_trend', data=reg).fit()
-    m3 = smf.ols('log_patents ~ time_trend + covid + log_ai_inv', data=reg).fit()
+    # Restrict both to 2015-2023 for direct comparison
+    us_reg = us_reg[us_reg['year'] >= 2015].copy()
+    epo_reg = epo_reg[epo_reg['year'] >= 2015].copy()
 
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+    us_reg['inv'] = us_reg['year'].map(us_investment)
+    epo_reg['inv'] = epo_reg['year'].map(eu10_investment)
+
+    for d in (us_reg, epo_reg):
+        d['log_patents'] = np.log(d['genuine_ai_patents'])
+        d['log_inv']     = np.log(d['inv'])
+        d['covid']       = d['year'].isin([2020, 2021]).astype(int)
+
+    m_us  = smf.ols('log_patents ~ covid + log_inv', data=us_reg).fit()
+    m_epo = smf.ols('log_patents ~ covid + log_inv', data=epo_reg).fit()
+
+    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
 
     ax = axes[0]
-    ax.axvspan(2019.5, 2021.5, color='#f0e0a0', alpha=0.4, zorder=0)
-    ax.text(2020.5, 500, 'COVID', ha='center', fontsize=8, color='#888800')
-    ax.plot(reg['year'], np.exp(m1.fittedvalues), color='#aaaaaa', lw=1.8,
-            linestyle='--', label=f'M1: time trend only ($R^2$={m1.rsquared:.3f})',
-            zorder=2)
-    ax.plot(reg['year'], np.exp(m3.fittedvalues), color='#c0392b', lw=2.2,
-            linestyle='-',
-            label=f'M3: +COVID +AI investment ($R^2$={m3.rsquared:.3f})', zorder=3)
-    ax.scatter(reg['year'], reg['genuine_ai_patents'], color='#1f4e79', s=55,
-               label='Observed', zorder=4)
+    ax.axvspan(2019.5, 2021.5, color='#f0e0a0', alpha=0.4, zorder=0, label='COVID-19 period')
+    ax.plot(us_reg['year'], np.exp(m_us.fittedvalues), color='#1f4e79', lw=2,
+            linestyle='--', zorder=2, label='Model fit')
+    ax.scatter(us_reg['year'], us_reg['genuine_ai_patents'], color='#1f4e79', s=55,
+               zorder=3, label='Observed')
     ax.set_xlabel('Publication year', fontsize=10)
-    ax.set_ylabel('Genuine AI patents', fontsize=10)
-    ax.set_title('(a) Observed vs model fit', fontsize=10, loc='left')
-    ax.legend(fontsize=8.5, frameon=False)
+    ax.set_ylabel('USPTO genuine AI patents', fontsize=10)
+    ax.set_title(f'(a) USPTO ~ US investment ($R^2$={m_us.rsquared:.3f})', fontsize=10, loc='left')
+    ax.legend(fontsize=8, frameon=False, loc='upper left')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.set_xlim(2009.5, 2023.5)
-    ax.set_xticks(range(2010, 2024, 2))
     ax.yaxis.set_major_formatter(
         plt.FuncFormatter(lambda x, _: f'{int(x/1000)}k' if x >= 1000 else str(int(x))))
+    ax.set_xticks(range(2015, 2024, 2))
 
     ax = axes[1]
-    coefs = m3.params.drop('Intercept')
-    cis   = m3.conf_int().drop('Intercept')
-    pvals = m3.pvalues.drop('Intercept')
-    labels = {
-        'time_trend':  'Time trend\n(years since 2010)',
-        'covid':       'COVID-19\n(2020-2021 dummy)',
-        'log_ai_inv':  'AI private investment\n(log, US$bn)'
-    }
-    order  = ['log_ai_inv', 'covid', 'time_trend']
-    y      = np.arange(len(order))
-    colors = ['#c0392b' if pvals[k] < 0.05 else '#cccccc' for k in order]
-    ax.barh(y, [coefs[k] for k in order], color=colors, height=0.45, alpha=0.85)
-    ax.errorbar(
-        [coefs[k] for k in order], y,
-        xerr=[
-            [coefs[k] - cis.loc[k, 0] for k in order],
-            [cis.loc[k, 1] - coefs[k] for k in order]
-        ],
-        fmt='none', color='#333333', lw=1.5, capsize=4
-    )
+    ax.axvspan(2019.5, 2021.5, color='#f0e0a0', alpha=0.4, zorder=0, label='COVID-19 period')
+    ax.plot(epo_reg['year'], np.exp(m_epo.fittedvalues), color='#c0392b', lw=2,
+            linestyle='--', zorder=2, label='Model fit')
+    ax.scatter(epo_reg['year'], epo_reg['genuine_ai_patents'], color='#c0392b', s=55,
+               marker='s', zorder=3, label='Observed')
+    ax.set_xlabel('Publication year', fontsize=10)
+    ax.set_ylabel('EPO genuine AI patents', fontsize=10)
+    ax.set_title(f'(b) EPO ~ EU-10 investment ($R^2$={m_epo.rsquared:.3f})', fontsize=10, loc='left')
+    ax.legend(fontsize=8, frameon=False, loc='upper left')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.set_xticks(range(2015, 2024, 2))
+
+    ax = axes[2]
+    labels = ['COVID-19\n(2020-2021)', 'log(own-jurisdiction\nAI investment)']
+    us_coefs  = [m_us.params['covid'], m_us.params['log_inv']]
+    us_lo     = [m_us.conf_int().loc['covid', 0], m_us.conf_int().loc['log_inv', 0]]
+    us_hi     = [m_us.conf_int().loc['covid', 1], m_us.conf_int().loc['log_inv', 1]]
+    epo_coefs = [m_epo.params['covid'], m_epo.params['log_inv']]
+    epo_lo    = [m_epo.conf_int().loc['covid', 0], m_epo.conf_int().loc['log_inv', 0]]
+    epo_hi    = [m_epo.conf_int().loc['covid', 1], m_epo.conf_int().loc['log_inv', 1]]
+
+    y = np.arange(len(labels))
+    width = 0.32
+    ax.barh(y + width/2, us_coefs, width, color='#1f4e79', alpha=0.85, label='USPTO ~ US inv.')
+    ax.errorbar(us_coefs, y + width/2,
+                xerr=[np.array(us_coefs) - np.array(us_lo), np.array(us_hi) - np.array(us_coefs)],
+                fmt='none', color='#333333', lw=1.3, capsize=3)
+    ax.barh(y - width/2, epo_coefs, width, color='#c0392b', alpha=0.85, label='EPO ~ EU inv.')
+    ax.errorbar(epo_coefs, y - width/2,
+                xerr=[np.array(epo_coefs) - np.array(epo_lo), np.array(epo_hi) - np.array(epo_coefs)],
+                fmt='none', color='#333333', lw=1.3, capsize=3)
     ax.axvline(0, color='#333333', lw=0.8, linestyle='--')
     ax.set_yticks(y)
-    ax.set_yticklabels([labels[k] for k in order], fontsize=9)
+    ax.set_yticklabels(labels, fontsize=9.5)
     ax.set_xlabel('Coefficient (log genuine AI patents)', fontsize=10)
-    ax.set_title('(b) M3 coefficients with 95% CI\n(controlling for secular time trend)',
-                 fontsize=10, loc='left')
-    for i, k in enumerate(order):
-        p   = pvals[k]
-        sig = '***' if p<0.001 else '**' if p<0.01 else '*' if p<0.05 else 'n.s.'
-        ax.text(cis.loc[k, 1] + 0.005, i, sig, va='center', fontsize=9,
-                color='#c0392b' if p<0.05 else '#888888')
+    ax.set_title('(c) Own-jurisdiction coefficients\n(95% CI)', fontsize=10, loc='left')
+    ax.legend(fontsize=9, frameon=False, loc='lower right')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_visible(False)
     ax.tick_params(left=False)
-    ax.set_xlim(-0.38, 0.42)
 
     plt.tight_layout(pad=1.5)
     plt.savefig('figures/fig8_regression.pdf', bbox_inches='tight')
@@ -695,3 +715,97 @@ else:
     print("  Done.")
 
 print("All 8 figures saved to figures/")
+
+# ══════════════════════════════════════════════════════════════════════════
+# FIG 9 — Country-level breakdown of genuine AI EPO patents
+# Requires: epo_candidates_with_country.csv (from bigquery_epo_with_country.py)
+#           merged with epo_results_qwen_bigquery.csv
+# ══════════════════════════════════════════════════════════════════════════
+print("Generating fig9_country_breakdown...")
+
+import matplotlib.patches as mpatches
+
+# Pre-computed country totals from merged EPO classification + BigQuery country data
+# (20,387 genuine AI patents with country identified, 2010-2023)
+country_data = [
+    ('JP',4478,21.97,49.57),('CN',3593,17.62,72.49),('DE',2369,11.62,33.95),
+    ('KR',2069,10.15,29.77),('FR',1085,5.32,12.53),('GB',1028,5.04,12.35),
+    ('NL',912,4.47,13.55),('IN',702,3.44,11.46),('SE',595,2.92,9.86),
+    ('US',552,2.71,5.95),('CH',467,2.29,7.33),('FI',418,2.05,5.13),
+    ('IT',210,1.03,2.44),('ES',207,1.02,2.13),('DK',169,0.83,2.60),
+    ('AU',167,0.82,1.91),('BE',159,0.78,2.18),('TW',139,0.68,1.97),
+    ('IE',117,0.57,1.23),('AT',77,0.38,0.93),
+]
+df_c = pd.DataFrame(country_data, columns=['country','total','share','slope'])
+
+EU27 = {'AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR',
+        'HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK',
+        'SI','ES','SE'}
+EU10 = {'DE','FR','NL','IT','IE','ES','BE','SE','AT','DK'}
+
+df_c['is_eu27'] = df_c['country'].isin(EU27)
+df_c['is_eu10'] = df_c['country'].isin(EU10)
+
+eu10_inv_2023 = {'DE':26629,'FR':30928,'NL':18306,'IT':12049,'IE':7421,
+                 'ES':8236,'BE':7042,'SE':6785,'AT':4635,'DK':4039}
+
+fig, axes = plt.subplots(1, 3, figsize=(17, 7))
+
+# Panel A: Top 15 countries
+ax = axes[0]
+top15 = df_c.head(15).copy()
+colors_a = ['#1f4e79' if eu else '#aaaaaa' for eu in top15['is_eu27']]
+ax.barh(range(len(top15)), top15['total'], color=colors_a, alpha=0.85)
+ax.set_yticks(range(len(top15)))
+ax.set_yticklabels(top15['country'], fontsize=9)
+ax.invert_yaxis()
+ax.set_xlabel('Genuine AI patents filed at EPO (2010–2023)', fontsize=9)
+ax.set_title('(a) Top 15 applicant countries', fontsize=10, loc='left')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+eu_patch  = mpatches.Patch(color='#1f4e79', alpha=0.85, label='EU27')
+non_patch = mpatches.Patch(color='#aaaaaa', alpha=0.85, label='Non-EU')
+ax.legend(handles=[eu_patch, non_patch], fontsize=8, frameon=False, loc='lower right')
+ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x,_: f'{int(x/1000)}k' if x>=1000 else str(int(x))))
+
+# Panel B: EU-10 scatter investment vs patents
+ax = axes[1]
+eu10_df = df_c[df_c['is_eu10']].copy()
+eu10_df['inv_2023'] = eu10_df['country'].map(eu10_inv_2023)
+ax.scatter(eu10_df['inv_2023'], eu10_df['total'], color='#1f4e79', s=80, alpha=0.85, zorder=3)
+for _, row in eu10_df.iterrows():
+    ax.annotate(row['country'], xy=(row['inv_2023'], row['total']),
+                xytext=(5,3), textcoords='offset points', fontsize=8.5, color='#333333')
+x = eu10_df['inv_2023'].values
+y = eu10_df['total'].values
+m, b = np.polyfit(x, y, 1)
+xline = np.linspace(x.min(), x.max(), 100)
+ax.plot(xline, m*xline+b, color='#c0392b', lw=1.5, linestyle='--', alpha=0.7)
+r = np.corrcoef(x, y)[0,1]
+ax.set_xlabel('EU-10 AI investment 2023 (M EUR, OECD.AI)', fontsize=9)
+ax.set_ylabel('Total genuine AI patents at EPO 2010–2023', fontsize=9)
+ax.set_title(f'(b) EU-10: investment vs EPO patenting\n(r = {r:.2f})', fontsize=10, loc='left')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# Panel C: EU-10 growth rates
+ax = axes[2]
+eu10_sorted = eu10_df.sort_values('slope', ascending=True)
+colors_c = ['#1f4e79' if s > 5 else '#6fa8d4' for s in eu10_sorted['slope']]
+ax.barh(range(len(eu10_sorted)), eu10_sorted['slope'], color=colors_c, alpha=0.85, height=0.6)
+ax.set_yticks(range(len(eu10_sorted)))
+ax.set_yticklabels(eu10_sorted['country'], fontsize=9)
+ax.set_xlabel('Annual growth in genuine AI EPO patents\n(patents/year, OLS slope 2010–2023)', fontsize=9)
+ax.set_title('(c) EU-10 filing growth rates', fontsize=10, loc='left')
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_visible(False)
+ax.tick_params(left=False)
+ax.axvline(0, color='#333333', lw=0.8)
+
+plt.tight_layout(pad=1.5)
+plt.savefig('figures/fig9_country_breakdown.pdf', bbox_inches='tight')
+plt.savefig('figures/fig9_country_breakdown.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("  Done.")
+print("All 9 figures saved to figures/")
