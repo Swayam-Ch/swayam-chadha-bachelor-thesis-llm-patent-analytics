@@ -788,20 +788,39 @@ ax.set_title(f'(b) EU-10: investment vs EPO patenting\n(r = {r:.2f})', fontsize=
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 
-# Panel C: EU-10 growth rates
+# Panel C: EU-10 annual line chart
+eu10_by_year = {
+    'DE': {2010:81,2011:65,2012:42,2013:49,2014:50,2015:48,2016:54,2017:64,2018:72,2019:191,2020:300,2021:414,2022:441,2023:498},
+    'FR': {2010:26,2011:31,2012:25,2013:34,2014:40,2015:46,2016:55,2017:79,2018:66,2019:66,2020:91,2021:125,2022:172,2023:229},
+    'NL': {2010:14,2011:10,2012:14,2013:21,2014:21,2015:9,2016:19,2017:26,2018:57,2019:108,2020:145,2021:161,2022:156,2023:151},
+    'SE': {2010:11,2011:7,2012:14,2013:12,2014:10,2015:12,2016:8,2017:18,2018:28,2019:45,2020:55,2021:88,2022:112,2023:175},
+    'IT': {2010:11,2011:7,2012:8,2013:8,2014:4,2015:5,2016:6,2017:8,2018:8,2019:17,2020:14,2021:28,2022:43,2023:43},
+    'ES': {2010:2,2011:8,2012:8,2013:11,2014:13,2015:11,2016:7,2017:6,2018:10,2019:14,2020:20,2021:20,2022:45,2023:32},
+    'BE': {2010:0,2011:6,2012:2,2013:8,2014:3,2015:6,2016:4,2017:7,2018:8,2019:13,2020:24,2021:22,2022:31,2023:25},
+    'DK': {2010:1,2011:6,2012:3,2013:3,2014:5,2015:5,2016:4,2017:4,2018:7,2019:8,2020:23,2021:24,2022:38,2023:38},
+    'AT': {2010:1,2011:5,2012:2,2013:1,2014:0,2015:0,2016:6,2017:5,2018:4,2019:7,2020:6,2021:10,2022:10,2023:20},
+    'IE': {2010:1,2011:0,2012:4,2013:9,2014:2,2015:6,2016:8,2017:2,2018:9,2019:16,2020:10,2021:18,2022:15,2023:17},
+}
+years_c = list(range(2010, 2024))
+colors_line = {'DE':'#1f4e79','FR':'#2e75b6','NL':'#2e86c1','SE':'#1a9641'}
+top4 = ['DE','FR','NL','SE']
+rest_c = ['IT','ES','BE','DK','AT','IE']
+
 ax = axes[2]
-eu10_sorted = eu10_df.sort_values('slope', ascending=True)
-colors_c = ['#1f4e79' if s > 5 else '#6fa8d4' for s in eu10_sorted['slope']]
-ax.barh(range(len(eu10_sorted)), eu10_sorted['slope'], color=colors_c, alpha=0.85, height=0.6)
-ax.set_yticks(range(len(eu10_sorted)))
-ax.set_yticklabels(eu10_sorted['country'], fontsize=9)
-ax.set_xlabel('Annual growth in genuine AI EPO patents\n(patents/year, OLS slope 2010–2023)', fontsize=9)
-ax.set_title('(c) EU-10 filing growth rates', fontsize=10, loc='left')
+for country in top4:
+    vals = [eu10_by_year[country].get(y,0) for y in years_c]
+    ax.plot(years_c, vals, color=colors_line[country], lw=2.2, label=country, zorder=3)
+for country in rest_c:
+    vals = [eu10_by_year[country].get(y,0) for y in years_c]
+    ax.plot(years_c, vals, color='#aaaaaa', lw=1.0, linestyle='--', alpha=0.7, zorder=2)
+ax.plot([], [], color='#aaaaaa', lw=1.0, linestyle='--', label='IT, ES, BE, DK, AT, IE')
+ax.set_xlabel('Publication year', fontsize=9)
+ax.set_ylabel('Genuine AI patents per year', fontsize=9)
+ax.set_title('(c) EU-10 annual EPO AI patent filings\nby country, 2010–2023', fontsize=10, loc='left')
+ax.legend(fontsize=8.5, frameon=False, loc='upper left')
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
-ax.spines['left'].set_visible(False)
-ax.tick_params(left=False)
-ax.axvline(0, color='#333333', lw=0.8)
+ax.set_xticks(range(2010, 2024, 2))
 
 plt.tight_layout(pad=1.5)
 plt.savefig('figures/fig9_country_breakdown.pdf', bbox_inches='tight')
